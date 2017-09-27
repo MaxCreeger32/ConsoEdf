@@ -1,0 +1,25 @@
+GET teleinfo/conso/_search
+{
+   "size": 1,
+   "sort": { "dateMesure": "desc"},
+   "query": {
+      "match_all": {}
+   }
+}
+
+GET teleinfo/conso/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "range": {
+          "dateMesure": {
+            "gte": "24/09/2017-22:15",
+            "lt": "24/09/2017-22:17",
+            "format": "dd/MM/yyyy-HH:mm"
+          }
+        }
+      }
+    }
+  }
+}
