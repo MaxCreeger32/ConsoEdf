@@ -1,0 +1,46 @@
+PUT teleinfo
+{
+  "mappings": {
+    "conso": {
+      "properties": {
+        "Periode": {
+          "type": "text"
+        },
+        "IndexHCreuses": {
+          "type": "integer"
+        },
+        "IndexHPleines": {
+          "type": "integer"
+        },
+        "InstantI1": {
+          "type": "integer"
+        },
+        "InstantI2": {
+          "type": "integer"
+        },
+        "InstantI3": {
+          "type": "integer"
+        },
+        "IMaxi1": {
+          "type": "integer"
+        },
+        "IMaxi2": {
+          "type": "integer"
+        },
+        "IMaxi3": {
+          "type": "integer"
+        },
+        "PuissanceApp": {
+          "type": "integer"
+        },
+        "PuissanceMax": {
+          "type": "integer"
+        },
+        "dateMesure": {
+          "type": "date",
+          "format": "dd/MM/yyyy-HH:mm"
+        }
+      }
+    }
+  }
+}
