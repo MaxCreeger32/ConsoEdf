@@ -51,7 +51,7 @@ dateDeMesure = datetime.datetime.now()
 data['dateMesure'] = dateDeMesure.strftime("%d/%m/%Y-%H:%M")
 
 document = json.dumps(data)
-es = Elasticsearch('http://elastic:Cab32b79@nounours:9200')
+es = Elasticsearch('http://nounours:9200')
 es.index(index='teleinfo', doc_type='conso', body=document) 
 
 print document
