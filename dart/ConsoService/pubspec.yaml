@@ -11,6 +11,6 @@ dependencies:
   args: ^0.13.7
   shelf: ^0.6.0
   http: any
-
+  intl : any
 #dev_dependencies:
 #  test: ^0.12.0

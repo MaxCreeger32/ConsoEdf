@@ -1,3 +1,5 @@
+library ConsoService.bin.lib.teleinfo;
+
 class Teleinfo {
   String periode;
   int indexHC;
