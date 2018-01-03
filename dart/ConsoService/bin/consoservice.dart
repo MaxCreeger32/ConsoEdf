@@ -22,29 +22,13 @@ class ConsoService {
   static const int _elasticPort = 9200;
   static const String _elasticPath = "teleinfo/conso/_search";
 
-  static const String _requeteJsonConsoInstant = '{'
-      '"size": 1,'
-      '"sort": { "dateMesure": "desc"},'
-      '"query": {'
-      '"match_all": {}'
-      '}'
-      '}';
-
-  static const String _requeteJsonConso = '{'
-    '"query": {'
-      '"bool": {'
-        '"filter": {'
-          '"range": {'
-            '"dateMesure": {'
-              '"gte": "24/09/2017-22:15",'
-              '"lt": "24/09/2017-22:17",'
-              '"format": "dd/MM/yyyy-HH:mm"'
-            '}'
-          '}'
-        '}'
-      '}'
-    '}'
-  '}';
+  static const String _requeteJsonConsoInstant = '''{
+      "size": 1,
+      "sort": { "dateMesure": "desc"},
+      "query": {
+      "match_all": {}
+      }
+      }''';
 
   ConsoService();
 
@@ -95,15 +79,60 @@ class ConsoService {
 Future<ConsoPeriodique> getConsoDeLaPeriode(DateTime debut,DateTime fin) async {
 
     ConsoPeriodique uneConso = null;
-    var response =
-    await http.post(_elasticUrl, headers: _headers, body: _requeteJsonConso);
-    stdout.writeln(response.body);
-    Teleinfo uneInfo = null;
-    if (response.statusCode == 200) {
-      uneInfo = parserReponseElastic(response);
-    }
+    Teleinfo teleinfoDuDebut = await getTeleinfoDeLaDate(debut);
+    Teleinfo teleinfoDeLaFin = await getTeleinfoDeLaDate(fin);
 
+    if (teleinfoDuDebut!=null && teleinfoDeLaFin !=null) {
+      uneConso = new ConsoPeriodique();
+      uneConso.indexHCDebut = teleinfoDuDebut.indexHC;
+      uneConso.indexHCFin = teleinfoDeLaFin.indexHC;
+      uneConso.consoHC = teleinfoDeLaFin.indexHC - teleinfoDuDebut.indexHC;
+
+      uneConso.indexHPDebut = teleinfoDuDebut.indexHP;
+      uneConso.indexHPFin = teleinfoDeLaFin.indexHP;
+      uneConso.consoHP = teleinfoDeLaFin.indexHP - teleinfoDuDebut.indexHP;
+
+      uneConso.dateDebut = debut;
+      uneConso.dateFin = fin;
+
+      stdout.writeln('ConsoHC : ${uneConso.consoHC}');
+      stdout.writeln('ConsoHP : ${uneConso.consoHP}');
+    }
     return uneConso;
+}
+
+Future<Teleinfo> getTeleinfoDeLaDate(DateTime date) async {
+     DateFormat df = new DateFormat("dd/MM/yyyy-HH:mm");
+
+  String dateDebutString=df.format(date);
+  DateTime datePlus1 = date.add(new Duration(minutes:1));
+  String datePlus1String = df.format(datePlus1);
+
+  String _requeteJsonConsoDate = '''{
+  "query": {
+    "bool": {
+      "filter": {
+        "range": {
+          "dateMesure": {
+            "gte": "$dateDebutString",
+            "lt": "$datePlus1String",
+            "format": "dd/MM/yyyy-HH:mm"
+          }
+        }
+      }
+    }
+  }
+    }''';
+
+  // appel du server ElasticSearch
+  var response =
+  await http.post(_elasticUrl, headers: _headers, body: _requeteJsonConsoDate);
+  stdout.writeln(response.body);
+  Teleinfo uneInfo = null;
+  if (response.statusCode == 200) {
+    uneInfo = parserReponseElastic(response);
+  }
+  return uneInfo;
 }
 
   /*try {

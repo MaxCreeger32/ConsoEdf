@@ -12,6 +12,7 @@ void main(List<String> args) {
   
   ConsoService service = new ConsoService();
   service.getConsoDuMoment();
+  service.getConsoDeLaPeriode(new DateTime(2018,1,3,0,0),new DateTime(2018,1,3,23,0));
   
 //  var parser = new ArgParser()
 //    ..addOption('port', abbr: 'p', defaultsTo: '8888');
