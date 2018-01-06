@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-from elasticsearch import Elasticsearch
-import  serial, sys, os, datetime, json
+
+from pymongo import MongoClient
+import serial
+import sys, os, datetime
 
 os.system('sudo stty -F /dev/ttyS0 1200 sane evenp parenb cs7 -crtscts')
 
@@ -14,7 +16,6 @@ try:
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.SEVENBITS,
     timeout=1)
-
 except:
   print "Impossible d'ouvrir le port serie" + SERIAL
   print sys.exc_info()
@@ -22,7 +23,8 @@ except:
 
 # 2. Lecture d'une trame complete
 compteur=0
-data = {} 
+data = {}
+#'Periode':'HP','IndexHCreuses': "019728489",'IndexHPleines':'019728489','InstantI1':'027','InstantI2':'027','InstantI3':'027','IMaxi1':'027','IMaxi2':'027','IMaxi3':'028','PuissanceApp':'02695','PuissanceMax':'13160'} 
 ADCO ='ADCO'
 while True :
 	trame=ser.readline().strip()
@@ -46,13 +48,15 @@ while True :
 		elif key == "PAPP" : data['PuissanceApp'] = value
 		elif key == "PMAX" : data['PuissanceMax'] = value
 
-dateDeMesure = datetime.datetime.now()
-#"dd/MM/yyyy-HH:mm"
-data['dateMesure'] = dateDeMesure.strftime("%d/%m/%Y-%H:%M")
+dateDeMesure = datetime.datetime.utcnow()
 
-document = json.dumps(data)
-es = Elasticsearch('http://nounours:9200')
-es.index(index='teleinfo', doc_type='conso', body=document) 
+data['dateMesure'] = dateDeMesure
 
-print document
+clientMongo = MongoClient('mongodb://bber:cab32b79@nounours:27017/')
+db = clientMongo.test_teleinfo
+collec = db.test_conso
+
+print (data)
+un_id=collec.insert_one(data).inserted_id
+print (un_id)
 ser.close()
