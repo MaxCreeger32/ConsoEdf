@@ -1,14 +1,17 @@
-import 'dart:async';
+library ConsoService;
 
+import 'dart:async';
+import 'package:rpc/rpc.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'lib/ConsoPeriodique.dart';
+import 'ConsoPeriodique.dart';
 import 'package:http/http.dart' as http;
-import 'lib/teleinfo.dart';
+import 'teleinfo.dart';
 import 'package:intl/intl.dart';
 
 //import 'dart:convert' as json;
 
+@ApiClass(version:'v1', name: 'conso')
 class ConsoService {
   static final _headers = {
     'Content-Type': 'application/json',
@@ -32,6 +35,7 @@ class ConsoService {
 
   ConsoService();
 
+  @ApiMethod(path:'consodumoment')
   Future<Teleinfo> getConsoDuMoment() async {
 //  _client.open('POST', _elasticHost, _elasticPort, _elasticPath);
     var response =
@@ -76,8 +80,21 @@ class ConsoService {
     }
     return uneInfo;
   }
-Future<ConsoPeriodique> getConsoDeLaPeriode(DateTime debut,DateTime fin) async {
 
+
+  
+  
+@ApiMethod(path:'consoDeLaPeriode/{dateDebut}/{dateFin}')
+/**
+ * dates au format yyyyMMddTHHmmss
+ */
+Future<ConsoPeriodique> getConsoDeLaPeriodeRest(String dateDebut,String dateFin){
+  DateTime debut =  DateTime.parse(dateDebut);
+  DateTime fin = DateTime.parse(dateFin);
+  return getConsoDeLaPeriode(debut, fin);
+}
+Future<ConsoPeriodique> getConsoDeLaPeriode(DateTime debut,DateTime fin) async {
+    
     ConsoPeriodique uneConso = null;
     Teleinfo teleinfoDuDebut = await getTeleinfoDeLaDate(debut);
     Teleinfo teleinfoDeLaFin = await getTeleinfoDeLaDate(fin);
@@ -99,6 +116,14 @@ Future<ConsoPeriodique> getConsoDeLaPeriode(DateTime debut,DateTime fin) async {
       stdout.writeln('ConsoHP : ${uneConso.consoHP}');
     }
     return uneConso;
+}
+
+@ApiMethod(path:'teleinfoDeLaDate/{date}')
+Future<Teleinfo> getTeleinfoDeLaDateRest(String date) {
+  //dd/MM/yyyy-HH:mm
+  DateFormat df = new DateFormat("yyyyMMddHHmm");
+  DateTime debut = DateTime.parse(date);
+  return getTeleinfoDeLaDate(debut);
 }
 
 Future<Teleinfo> getTeleinfoDeLaDate(DateTime date) async {
