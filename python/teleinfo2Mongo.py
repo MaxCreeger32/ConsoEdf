@@ -37,16 +37,16 @@ while True :
 	      		ADCO = value
 			# la periode pour moi est 'HC' ou 'HP', seul les 2 1ers char sont utiles
 		elif key == "PTEC" : data['Periode'] = value[:2]
-		elif key == "HCHC" : data['IndexHCreuses'] = value
-		elif key == "HCHP" : data['IndexHPleines'] = value
-		elif key == "IINST1" : data['InstantI1'] = value
-		elif key == "IINST2" : data['InstantI2'] = value
-		elif key == "IINST3" : data['InstantI3'] = value
-		elif key == "IMAX1" : data['IMaxi1'] = value
-		elif key == "IMAX2" : data['IMaxi2'] = value
-		elif key == "IMAX3" : data['IMaxi3'] = value
-		elif key == "PAPP" : data['PuissanceApp'] = value
-		elif key == "PMAX" : data['PuissanceMax'] = value
+		elif key == "HCHC" : data['IndexHCreuses'] = int(value)
+		elif key == "HCHP" : data['IndexHPleines'] = int(value)
+		elif key == "IINST1" : data['InstantI1'] = int(value)
+		elif key == "IINST2" : data['InstantI2'] = int(value)
+		elif key == "IINST3" : data['InstantI3'] = int(value)
+		elif key == "IMAX1" : data['IMaxi1'] = int(value)
+		elif key == "IMAX2" : data['IMaxi2'] = int(value)
+		elif key == "IMAX3" : data['IMaxi3'] = int(value)
+		elif key == "PAPP" : data['PuissanceApp'] = int(value)
+		elif key == "PMAX" : data['PuissanceMax'] = int(value)
 
 dateDeMesure = datetime.datetime.utcnow()
 
