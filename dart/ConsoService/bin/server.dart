@@ -65,3 +65,8 @@ Future main(List<String> args) async {
 
 
 }
+}
+
+shelf.Response _echoRequest(shelf.Request request) {
+  return new shelf.Response.ok('Request for "${request.url}"');
+}

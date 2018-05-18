@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 
 //import 'dart:convert' as json;
 
-@ApiClass(version: 'v1', name: 'conso')
+@ApiClass(version:'v1', name: 'conso')
 class ConsoService {
   static final _headers = {
     'Content-Type': 'application/json',
@@ -35,11 +35,11 @@ class ConsoService {
 
   ConsoService();
 
-  @ApiMethod(path: 'consodumoment')
+  @ApiMethod(path:'consodumoment')
   Future<Teleinfo> getConsoDuMoment() async {
 //  _client.open('POST', _elasticHost, _elasticPort, _elasticPath);
-    var response = await http.post(_elasticUrl,
-        headers: _headers, body: _requeteJsonConsoInstant);
+    var response =
+        await http.post(_elasticUrl, headers: _headers, body: _requeteJsonConsoInstant);
     stdout.writeln(response.body);
     Teleinfo uneInfo = null;
     if (response.statusCode == 200) {
@@ -52,6 +52,7 @@ class ConsoService {
    * parse la réponse faite par elastic pour produire un objet Teleinfo
    */
   Teleinfo parserReponseElastic(http.Response response) {
+
     Teleinfo uneInfo = null;
     Map jsonData = JSON.decode(response.body);
     Map hits = jsonData['hits'];
@@ -70,33 +71,35 @@ class ConsoService {
           formatter.parse(unDoc['dateMesure']),
           int.parse(unDoc['PuissanceApp']));
       stdout.writeln("uneInfo");
-      stdout.writeln("Date Mesure : " + formatter.format(uneInfo.dateMesure));
-      stdout.writeln("Index HC : " + uneInfo.indexHC.toString());
-      stdout.writeln("Index HP : " + uneInfo.indexHP.toString());
-      stdout.writeln("Periode : " + uneInfo.periode);
-      stdout.writeln("Conso en cours : " + uneInfo.puissanceApp.toString());
+      stdout.writeln("Date Mesure : "+formatter.format(uneInfo.dateMesure));
+      stdout.writeln("Index HC : "+  uneInfo.indexHC.toString());
+      stdout.writeln("Index HP : "+  uneInfo.indexHP.toString());
+      stdout.writeln("Periode : "+uneInfo.periode);
+      stdout.writeln("Conso en cours : "+uneInfo.puissanceApp.toString());
+
     }
     return uneInfo;
   }
 
-  @ApiMethod(path: 'consoDeLaPeriode/{dateDebut}/{dateFin}')
+
+  
+  
+@ApiMethod(path:'consoDeLaPeriode/{dateDebut}/{dateFin}')
 /**
  * dates au format yyyyMMddTHHmmss
  */
-  Future<ConsoPeriodique> getConsoDeLaPeriodeRest(
-      String dateDebut, String dateFin) {
-    DateTime debut = DateTime.parse(dateDebut);
-    DateTime fin = DateTime.parse(dateFin);
-    return getConsoDeLaPeriode(debut, fin);
-  }
-
-  Future<ConsoPeriodique> getConsoDeLaPeriode(
-      DateTime debut, DateTime fin) async {
+Future<ConsoPeriodique> getConsoDeLaPeriodeRest(String dateDebut,String dateFin){
+  DateTime debut =  DateTime.parse(dateDebut);
+  DateTime fin = DateTime.parse(dateFin);
+  return getConsoDeLaPeriode(debut, fin);
+}
+Future<ConsoPeriodique> getConsoDeLaPeriode(DateTime debut,DateTime fin) async {
+    
     ConsoPeriodique uneConso = null;
     Teleinfo teleinfoDuDebut = await getTeleinfoDeLaDate(debut);
     Teleinfo teleinfoDeLaFin = await getTeleinfoDeLaDate(fin);
 
-    if (teleinfoDuDebut != null && teleinfoDeLaFin != null) {
+    if (teleinfoDuDebut!=null && teleinfoDeLaFin !=null) {
       uneConso = new ConsoPeriodique();
       uneConso.indexHCDebut = teleinfoDuDebut.indexHC;
       uneConso.indexHCFin = teleinfoDeLaFin.indexHC;
@@ -113,33 +116,31 @@ class ConsoService {
       stdout.writeln('ConsoHP : ${uneConso.consoHP}');
     }
     return uneConso;
-  }
+}
 
-  @ApiMethod(path: 'teleinfoDeLaDate/{date}')
-  Future<Teleinfo> getTeleinfoDeLaDateRest(String date) {
-    //dd/MM/yyyy-HH:mm
-    DateFormat df = new DateFormat("yyyyMMddHHmm");
-    DateTime debut = DateTime.parse(date);
-    return getTeleinfoDeLaDate(debut);
-  }
+@ApiMethod(path:'teleinfoDeLaDate/{date}')
+Future<Teleinfo> getTeleinfoDeLaDateRest(String date) {
+  //dd/MM/yyyy-HH:mm
+  DateFormat df = new DateFormat("yyyyMMddHHmm");
+  DateTime debut = DateTime.parse(date);
+  return getTeleinfoDeLaDate(debut);
+}
 
-  Future<Teleinfo> getTeleinfoDeLaDate(DateTime date) async {
-    DateFormat df = new DateFormat("dd/MM/yyyy-HH:mm");
+Future<Teleinfo> getTeleinfoDeLaDate(DateTime date) async {
+     DateFormat df = new DateFormat("dd/MM/yyyy-HH:mm");
 
-    String dateDebutString = df.format(date);
-    DateTime datePlus1 = date.add(new Duration(minutes: 1));
-    String datePlus1String = df.format(datePlus1);
-    String ordre = "desc";
+  String dateDebutString=df.format(date);
+  DateTime datePlus1 = date.add(new Duration(minutes:1));
+  String datePlus1String = df.format(datePlus1);
 
-    String requeteJsonConsoDateTemplate = '''{
-  "sort": { "dateMesure": "#ordre#"},
+  String _requeteJsonConsoDate = '''{
   "query": {
     "bool": {
       "filter": {
         "range": {
           "dateMesure": {
-            "gte": "#dateDebut#",
-            "lt": "#dateFin#",
+            "gte": "$dateDebutString",
+            "lt": "$datePlus1String",
             "format": "dd/MM/yyyy-HH:mm"
           }
         }
@@ -148,45 +149,21 @@ class ConsoService {
   }
     }''';
 
-    ;
-    String requeteJson =
-        requeteJsonConsoDateTemplate.replaceAll("#ordre#", ordre);
-    requeteJson =
-        requeteJson.replaceAll("#dateDebut#", dateDebutString);
-    requeteJson =
-        requeteJson.replaceAll("#dateFin#", datePlus1String);
-    // appel du server ElasticSearch
-    var response = await http.post(_elasticUrl,
-        headers: _headers, body: requeteJson);
-    stdout.writeln(response.body);
-    Teleinfo uneInfo = null;
-    if (response.statusCode == 200) {
-      uneInfo = parserReponseElastic(response);
-    }
-
-    if (uneInfo == null) {
-      // on doit avoir un trou dans les données, on va choper la date la plus proche
-      // requeteAvant on s'en va voir 4h avant
-      DateTime dateDebutMoins4h = date.subtract(new Duration(hours: 4));
-      ordre = "desc";
-      requeteJson=requeteJsonConsoDateTemplate.replaceAll("#ordre#", ordre);
-      requeteJson=requeteJsonConsoDateTemplate.replaceAll("#dateDebut#", dateDebutString);
-      requeteJson=requeteJsonConsoDateTemplate.replaceAll("#dateFin#", datePlus1String);
-    }
-    return uneInfo;
+  // appel du server ElasticSearch
+  var response =
+  await http.post(_elasticUrl, headers: _headers, body: _requeteJsonConsoDate);
+  stdout.writeln(response.body);
+  Teleinfo uneInfo = null;
+  if (response.statusCode == 200) {
+    uneInfo = parserReponseElastic(response);
   }
+  return uneInfo;
+}
 
-  /**
-   * ramène une liste de consoPeriodique d'une période découpéé par une type de période
-   * i.e. : Jour,Semaine,Mois
-   */
-  Future<List<ConsoPeriodique>> getListeDeConsoDeLaPeriode(
-      String dateDebut, String dateFin, typePeriode) async {
-    //TODO
-    List<ConsoPeriodique> listeDeConso = new List<ConsoPeriodique>();
+  /*try {
 
+    } catch (e){
 
-
-    return listeDeConso;
-  }
+    }
+*/
 }
