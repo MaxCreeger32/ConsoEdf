@@ -53,8 +53,8 @@ dateDeMesure = datetime.datetime.utcnow()
 data['dateMesure'] = dateDeMesure
 
 clientMongo = MongoClient('mongodb://bber:cab32b79@nounours:27017/')
-db = clientMongo.test_teleinfo
-collec = db.test_conso
+db = clientMongo.teleinfo
+collec = db.conso
 
 print (data)
 un_id=collec.insert_one(data).inserted_id
